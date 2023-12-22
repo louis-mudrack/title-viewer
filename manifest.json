@@ -17,6 +17,6 @@
         "default_icon": "images/icon-inactive.png",
         "default_title": "Title Display"
     },
-    "permissions": ["activeTab", "scripting"],
+    "permissions": ["activeTab", "scripting", "storage", "windows"],
     "host_permissions": ["<all_urls>"]
 }

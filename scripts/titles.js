@@ -53,13 +53,13 @@
         let layer = document.querySelector('#title-display-layer');
 
         if (layer) {
+            // If the layer already exists, remove it to reset the display
             document.body.removeChild(layer);
             return;
         } else {
             // Create a new layer for title labels
             layer = document.createElement('div');
             layer.id = 'title-display-layer';
-
             Object.assign(layer.style, {
                 zIndex: getHighestZindex() + 1,
                 position: 'absolute',
@@ -67,34 +67,20 @@
                 left: 0,
                 pointerEvents: 'none',
             });
-
             document.body.appendChild(layer);
+        }
 
-            // Elements with title attribute
-            const elementsWithTitles = [
-                ...document.querySelectorAll('a'),
-                ...document.querySelectorAll('abbr'),
-                ...document.querySelectorAll('area'),
-                ...document.querySelectorAll('button'),
-                ...document.querySelectorAll('input'),
-                ...document.querySelectorAll('label'),
-                ...document.querySelectorAll('select'),
-                ...document.querySelectorAll('textarea'),
-                ...document.querySelectorAll('optgroup'),
-                ...document.querySelectorAll('option'),
-                ...document.querySelectorAll('fieldset'),
-                ...document.querySelectorAll('legend'),
-                ...document.querySelectorAll('iframe'),
-                ...document.querySelectorAll('img'),
-                ...document.querySelectorAll('map'),
-                ...document.querySelectorAll('object'),
-                ...document.querySelectorAll('param'),
-                ...document.querySelectorAll('audio'),
-                ...document.querySelectorAll('video'),
-                ...document.querySelectorAll('track'),
-            ];
+        // Load the user's settings and then process elements
+        chrome.storage.sync.get(['selectedElements'], (result) => {
+            const selectedElements = result.selectedElements || [
+                'a',
+                'abbr',
+                'button',
+            ]; // Default elements if none are selected
+            const selectors = selectedElements.map((el) => el).join(',');
+            const elements = document.querySelectorAll(selectors);
 
-            elementsWithTitles.forEach((ele) => {
+            elements.forEach((ele) => {
                 if (isHidden(ele)) {
                     return;
                 }
@@ -110,10 +96,10 @@
                     text = 'Empty title attribute';
                     color = config.emptyColor;
                 } else if (title.trim().length < 10) {
-                    text = `Short title text: ${ele.title}`;
+                    text = `Short title text: ${title}`;
                     color = config.emptyColor;
                 } else {
-                    text = `Title text: ${ele.title}`;
+                    text = `Title text: ${title}`;
                     color = config.existColor;
                 }
 
@@ -121,7 +107,8 @@
                 const label = createLabel(ele, text, color);
                 layer.appendChild(label);
             });
-        }
+        });
     }
-	init();
+
+    init();
 })();
