@@ -74,7 +74,6 @@
         chrome.storage.sync.get(['selectedElements'], (result) => {
             const selectedElements = result.selectedElements || [
                 'a',
-                'abbr',
                 'button',
             ]; // Default elements if none are selected
             const selectors = selectedElements.map((el) => el).join(',');
