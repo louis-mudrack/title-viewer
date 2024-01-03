@@ -51,11 +51,10 @@
     // Method to initialize the title display process
     function init() {
         let layer = document.querySelector('#title-display-layer');
-
+    
         if (layer) {
             // If the layer already exists, remove it to reset the display
-            document.body.removeChild(layer);
-            return;
+            layer.remove();
         } else {
             // Create a new layer for title labels
             layer = document.createElement('div');
@@ -69,13 +68,10 @@
             });
             document.body.appendChild(layer);
         }
-
+    
         // Load the user's settings and then process elements
         chrome.storage.sync.get(['selectedElements'], (result) => {
-            const selectedElements = result.selectedElements || [
-                'a',
-                'button',
-            ]; // Default elements if none are selected
+            const selectedElements = result.selectedElements || ['a', 'button', 'img']; // Include 'img' in the default selection
             const selectors = selectedElements.map((el) => el).join(',');
             const elements = document.querySelectorAll(selectors);
 
@@ -83,25 +79,36 @@
                 if (isHidden(ele)) {
                     return;
                 }
-
-                // Get the title attribute and determine the label text and color
-                const title = ele.getAttribute('title');
+            
                 let text, color;
-
-                if (title === null) {
-                    text = 'Missing title attribute';
-                    color = config.missingColor;
-                } else if (title.trim() === '') {
-                    text = 'Empty title attribute';
-                    color = config.emptyColor;
-                } else if (title.trim().length < 10) {
-                    text = `Short title text: ${title}`;
-                    color = config.emptyColor;
+                if (ele.tagName.toLowerCase() === 'img') {
+                    // Handle img elements separately
+                    const alt = ele.getAttribute('alt');
+                    if (alt === null) {
+                        text = 'Missing alt attribute';
+                        color = config.missingColor;
+                    } else if (alt.trim() === '') {
+                        text = 'Empty alt attribute';
+                        color = config.emptyColor;
+                    } else {
+                        text = `Alt text: ${alt}`;
+                        color = config.existColor;
+                    }
                 } else {
-                    text = `Title text: ${title}`;
-                    color = config.existColor;
+                    // Handle other elements with title attributes
+                    const title = ele.getAttribute('title');
+                    if (title === null) {
+                        text = 'Missing title attribute';
+                        color = config.missingColor;
+                    } else if (title.trim() === '') {
+                        text = 'Empty title attribute';
+                        color = config.emptyColor;
+                    } else {
+                        text = `Title text: ${title}`;
+                        color = config.existColor;
+                    }
                 }
-
+            
                 // Create a label for the element and append it to the layer
                 const label = createLabel(ele, text, color);
                 layer.appendChild(label);
